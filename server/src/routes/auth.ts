@@ -158,7 +158,7 @@ router.get("/debug/db-health", async (req, res) => {
 
     res.json({
       database: {
-        state: states[dbState] || "unknown",
+        state: states[dbState as keyof typeof states] || "unknown",
         readyState: dbState,
         host: mongoose.connection.host,
         name: mongoose.connection.name,

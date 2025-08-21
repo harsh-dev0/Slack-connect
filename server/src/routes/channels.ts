@@ -73,7 +73,10 @@ router.get("/debug/:userId", async (req, res) => {
       return res.json({
         step: "token_retrieval",
         success: false,
-        error: tokenError.message,
+        error:
+          tokenError instanceof Error
+            ? tokenError.message
+            : String(tokenError),
         userId,
       })
     }
@@ -96,7 +99,10 @@ router.get("/debug/:userId", async (req, res) => {
       return res.json({
         step: "slack_api",
         success: false,
-        error: slackError.message,
+        error:
+          slackError instanceof Error
+            ? slackError.message
+            : String(slackError),
         userId,
       })
     }
