@@ -49,15 +49,15 @@ const ScheduledMessages: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-900 text-yellow-300 border-yellow-700"
       case "sent":
-        return "bg-green-100 text-green-800"
+        return "bg-green-900 text-green-300 border-green-700"
       case "failed":
-        return "bg-red-100 text-red-800"
+        return "bg-red-900 text-red-300 border-red-700"
       case "cancelled":
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-800 text-gray-300 border-gray-600"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-800 text-gray-300 border-gray-600"
     }
   }
 
@@ -137,15 +137,15 @@ const ScheduledMessages: React.FC = () => {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-gray-900 border border-gray-700 rounded-lg p-6">
+      <h2 className="text-lg font-semibold text-white mb-4">
         Scheduled Messages
       </h2>
 
       {state.loading.messages ? (
         <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Loading messages...</span>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
+          <span className="ml-2 text-gray-300">Loading messages...</span>
         </div>
       ) : state.scheduledMessages.length === 0 ? (
         <div className="text-center py-8">
@@ -162,10 +162,10 @@ const ScheduledMessages: React.FC = () => {
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <h3 className="mt-2 text-sm font-medium text-white">
             No scheduled messages
           </h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-300">
             Schedule a message using the composer above to see it here.
           </p>
         </div>
@@ -174,16 +174,16 @@ const ScheduledMessages: React.FC = () => {
           {state.scheduledMessages.map((message) => (
             <div
               key={message._id}
-              className="border border-gray-200 rounded-lg p-4"
+              className="border border-gray-700 rounded-lg p-4 bg-gray-800"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-white">
                       #{message.channelName}
                     </span>
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
                         message.status
                       )}`}
                     >
@@ -194,11 +194,11 @@ const ScheduledMessages: React.FC = () => {
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-700 mb-2 line-clamp-2">
+                  <p className="text-sm text-gray-300 mb-2 line-clamp-2">
                     {message.message}
                   </p>
 
-                  <div className="flex items-center space-x-4 text-xs text-gray-500">
+                  <div className="flex items-center space-x-4 text-xs text-gray-400">
                     <span>
                       Scheduled:{" "}
                       {format(
@@ -228,7 +228,7 @@ const ScheduledMessages: React.FC = () => {
                   </div>
 
                   {message.error && (
-                    <p className="text-xs text-red-600 mt-1">
+                    <p className="text-xs text-red-400 mt-1">
                       Error: {message.error}
                     </p>
                   )}
@@ -237,7 +237,7 @@ const ScheduledMessages: React.FC = () => {
                 {message.status === "pending" && (
                   <button
                     onClick={() => handleCancelMessage(message._id)}
-                    className="ml-4 text-red-600 hover:text-red-800 text-sm font-medium"
+                    className="ml-4 text-red-400 hover:text-red-300 text-sm font-medium"
                   >
                     Cancel
                   </button>

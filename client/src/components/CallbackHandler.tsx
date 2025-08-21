@@ -10,12 +10,33 @@ const CallbackHandler: React.FC = () => {
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get("code")
       const error = urlParams.get("error")
+      const success = urlParams.get("success")
+      const userId = urlParams.get("userId")
+      const teamId = urlParams.get("teamId")
 
       if (error) {
         dispatch({
           type: "SET_ERROR",
           payload: `Authorization error: ${error}`,
         })
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        )
+        return
+      }
+
+      if (success === "true" && userId && teamId) {
+        dispatch({
+          type: "SET_USER",
+          payload: {
+            id: userId,
+            teamId: teamId,
+            isConnected: true,
+          },
+        })
+        dispatch({ type: "SET_ERROR", payload: null })
         window.history.replaceState(
           {},
           document.title,
@@ -45,12 +66,13 @@ const CallbackHandler: React.FC = () => {
             document.title,
             window.location.pathname
           )
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error("Callback error:", error)
           dispatch({
             type: "SET_ERROR",
             payload:
-              error.response?.data?.error ||
+              (error as { response?: { data?: { error?: string } } })
+                ?.response?.data?.error ||
               "Failed to complete authorization",
           })
         } finally {

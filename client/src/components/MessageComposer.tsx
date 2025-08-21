@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useApp } from "../context/useApp"
 import { channelsApi, messagesApi, type Channel } from "../services/api"
 import { format } from "date-fns"
+import toast from "react-hot-toast"
 
 const MessageComposer: React.FC = () => {
   const { state, dispatch } = useApp()
@@ -69,14 +70,24 @@ const MessageComposer: React.FC = () => {
         )
 
         dispatch({ type: "SET_ERROR", payload: null })
-        alert("Message scheduled successfully!")
+        toast.success("Message scheduled successfully!")
+
+        // Refresh scheduled messages list
+        try {
+          const { messages } = await messagesApi.getScheduledMessages(
+            state.user.id
+          )
+          dispatch({ type: "SET_SCHEDULED_MESSAGES", payload: messages })
+        } catch (error) {
+          console.error("Failed to refresh scheduled messages:", error)
+        }
       } else {
         await messagesApi.sendMessage(
           state.user.id,
           selectedChannel.id,
           message
         )
-        alert("Message sent successfully!")
+        toast.success("Message sent successfully!")
       }
 
       setMessage("")
@@ -104,22 +115,22 @@ const MessageComposer: React.FC = () => {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-gray-900 border border-gray-700 rounded-lg p-6">
+      <h2 className="text-lg font-semibold text-white mb-4">
         Compose Message
       </h2>
 
       {state.loading.channels ? (
         <div className="flex items-center justify-center p-4">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Loading channels...</span>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
+          <span className="ml-2 text-gray-300">Loading channels...</span>
         </div>
       ) : (
         <div className="space-y-4">
           <div>
             <label
               htmlFor="channel"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-300 mb-2"
             >
               Select Channel
             </label>
@@ -132,7 +143,7 @@ const MessageComposer: React.FC = () => {
                 )
                 setSelectedChannel(channel || null)
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-zinc-500 transition-all duration-200 hover:border-gray-500 cursor-pointer"
             >
               <option value="">Choose a channel...</option>
               {state.channels.map((channel) => (
@@ -146,7 +157,7 @@ const MessageComposer: React.FC = () => {
           <div>
             <label
               htmlFor="message"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-300 mb-2"
             >
               Message
             </label>
@@ -156,7 +167,7 @@ const MessageComposer: React.FC = () => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message here..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-zinc-500 transition-all duration-200 hover:border-gray-500 resize-none"
             />
           </div>
 
@@ -166,11 +177,11 @@ const MessageComposer: React.FC = () => {
               id="schedule"
               checked={isScheduled}
               onChange={(e) => setIsScheduled(e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-5 w-5 text-zinc-600 focus:ring-zinc-500 focus:ring-2 border-gray-600 bg-gray-800 rounded-md transition-all duration-200 cursor-pointer"
             />
             <label
               htmlFor="schedule"
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-medium text-gray-300"
             >
               Schedule for later
             </label>
@@ -181,7 +192,7 @@ const MessageComposer: React.FC = () => {
               <div>
                 <label
                   htmlFor="date"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-300 mb-2"
                 >
                   Date
                 </label>
@@ -191,13 +202,16 @@ const MessageComposer: React.FC = () => {
                   value={scheduleDate}
                   onChange={(e) => setScheduleDate(e.target.value)}
                   min={format(new Date(), "yyyy-MM-dd")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-zinc-500 transition-all duration-200 hover:border-gray-500"
+                  style={{
+                    colorScheme: 'dark'
+                  }}
                 />
               </div>
               <div>
                 <label
                   htmlFor="time"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-300 mb-2"
                 >
                   Time
                 </label>
@@ -206,15 +220,18 @@ const MessageComposer: React.FC = () => {
                   id="time"
                   value={scheduleTime}
                   onChange={(e) => setScheduleTime(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-zinc-500 transition-all duration-200 hover:border-gray-500"
+                  style={{
+                    colorScheme: 'dark'
+                  }}
                 />
               </div>
             </div>
           )}
 
           {state.error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3">
-              <p className="text-sm text-red-600">{state.error}</p>
+            <div className="bg-red-900 border border-red-700 rounded-md p-3">
+              <p className="text-sm text-red-300">{state.error}</p>
             </div>
           )}
 
@@ -226,7 +243,7 @@ const MessageComposer: React.FC = () => {
               state.loading.sending ||
               (isScheduled && (!scheduleDate || !scheduleTime))
             }
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+            className="w-full bg-zinc-700 text-white py-3 px-4 rounded-lg font-medium hover:bg-zinc-600 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
           >
             {state.loading.sending ? (
               <>

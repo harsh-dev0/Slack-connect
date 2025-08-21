@@ -21,7 +21,7 @@ const HealthCheck = () => {
 
   if (status === "checking") {
     return (
-      <div className="flex items-center text-sm text-gray-500">
+      <div className="flex items-center text-sm text-gray-400">
         <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-400 mr-2"></div>
         Connecting...
       </div>
@@ -30,7 +30,7 @@ const HealthCheck = () => {
 
   if (status === "error") {
     return (
-      <div className="flex items-center text-sm text-red-600">
+      <div className="flex items-center text-sm text-red-400">
         <svg
           className="w-3 h-3 mr-2"
           fill="none"
@@ -50,7 +50,7 @@ const HealthCheck = () => {
   }
 
   return (
-    <div className="flex items-center text-sm text-green-600">
+    <div className="flex items-center text-sm text-green-400">
       <svg
         className="w-3 h-3 mr-2"
         fill="none"
@@ -64,7 +64,7 @@ const HealthCheck = () => {
           d="M5 13l4 4L19 7"
         />
       </svg>
-      Connected
+      Server Connected
     </div>
   )
 }

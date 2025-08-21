@@ -57,15 +57,15 @@ const AuthConnect: React.FC = () => {
   if (state.loading.auth) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600">Checking connection...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+        <span className="ml-2 text-gray-300">Checking connection...</span>
       </div>
     )
   }
 
   if (state.user.isConnected) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+      <div className="bg-green-900 border border-green-700 rounded-lg p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -84,10 +84,10 @@ const AuthConnect: React.FC = () => {
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">
+              <h3 className="text-sm font-medium text-green-300">
                 Connected to Slack
               </h3>
-              <p className="text-sm text-green-600">
+              <p className="text-sm text-green-400">
                 Your workspace is connected and ready to use
               </p>
             </div>
@@ -104,7 +104,7 @@ const AuthConnect: React.FC = () => {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
+    <div className="bg-gray-900 border border-gray-700 rounded-lg p-6">
       <div className="text-center">
         <svg
           className="mx-auto h-12 w-12 text-gray-400"
@@ -119,10 +119,10 @@ const AuthConnect: React.FC = () => {
             d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
           />
         </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">
+        <h3 className="mt-2 text-sm font-medium text-white">
           Connect to Slack
         </h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-300">
           Connect your Slack workspace to start sending messages
         </p>
         <div className="mt-6">
