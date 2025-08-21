@@ -99,12 +99,16 @@ router.get("/slack/callback", async (req, res) => {
 router.get("/status/:userId", async (req, res) => {
   try {
     const { userId } = req.params
+    console.log(`🔍 Checking auth status for user: ${userId}`)
+
     const user = await User.findOne({ slackUserId: userId })
 
     if (!user) {
+      console.log(`❌ User not found in auth status check: ${userId}`)
       return res.json({ connected: false })
     }
 
+    console.log(`✅ User found in auth status check: ${userId}`)
     res.json({
       connected: true,
       teamId: user.slackTeamId,
@@ -113,6 +117,22 @@ router.get("/status/:userId", async (req, res) => {
     })
   } catch (error: any) {
     console.error("Auth status error:", error)
+    res.status(500).json({ error: error.message })
+  }
+})
+
+router.get("/debug/users", async (req, res) => {
+  try {
+    const users = await User.find(
+      {},
+      { slackUserId: 1, slackTeamId: 1, createdAt: 1, _id: 0 }
+    )
+    res.json({
+      count: users.length,
+      users: users,
+    })
+  } catch (error: any) {
+    console.error("Debug users error:", error)
     res.status(500).json({ error: error.message })
   }
 })

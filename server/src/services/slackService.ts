@@ -106,6 +106,13 @@ export class SlackService {
 
   static async getChannels(accessToken: string): Promise<SlackChannel[]> {
     try {
+      console.log(
+        `🔍 Fetching channels from Slack API with token: ${accessToken.substring(
+          0,
+          10
+        )}...`
+      )
+
       const response = await axios.get(
         `${this.BASE_URL}/conversations.list`,
         {
@@ -119,18 +126,37 @@ export class SlackService {
         }
       )
 
+      console.log(`📡 Slack API response status: ${response.status}`)
+      console.log(`📡 Slack API response ok: ${response.data.ok}`)
+
       if (!response.data.ok) {
+        console.error(`❌ Slack API error: ${response.data.error}`)
         if (response.data.error === "token_expired") {
           throw new Error("TOKEN_EXPIRED")
         }
         throw new Error(`Slack API error: ${response.data.error}`)
       }
 
-      return response.data.channels
+      const channels = response.data.channels || []
+      console.log(
+        `✅ Successfully fetched ${channels.length} channels from Slack`
+      )
+
+      return channels
     } catch (error: any) {
+      console.error(
+        `❌ Error fetching channels from Slack:`,
+        error.response?.data || error.message
+      )
+
       if (error.message === "TOKEN_EXPIRED") {
         throw error
       }
+
+      if (error.response?.status === 401) {
+        throw new Error("TOKEN_EXPIRED")
+      }
+
       throw new Error(`Failed to fetch channels: ${error.message}`)
     }
   }
@@ -170,18 +196,31 @@ export class SlackService {
   }
 
   static async getValidAccessToken(userId: string): Promise<string> {
+    console.log(`🔍 Looking up user: ${userId}`)
+
     const user = await User.findOne({ slackUserId: userId })
     if (!user) {
+      console.error(`❌ User not found in database: ${userId}`)
       throw new Error("User not found")
     }
 
+    console.log(
+      `✅ Found user: ${userId}, token expires: ${user.tokenExpiresAt}`
+    )
+
     if (user.tokenExpiresAt && user.tokenExpiresAt <= new Date()) {
+      console.log(
+        `⏰ Token expired for user ${userId}, attempting refresh`
+      )
+
       if (!user.refreshToken) {
+        console.error(`❌ No refresh token available for user ${userId}`)
         throw new Error("Token expired and no refresh token available")
       }
 
       try {
         const tokenData = await this.refreshAccessToken(user.refreshToken)
+        console.log(`✅ Successfully refreshed token for user ${userId}`)
 
         user.accessToken = tokenData.access_token
         if (tokenData.refresh_token) {
@@ -198,10 +237,15 @@ export class SlackService {
 
         await user.save()
       } catch (error) {
+        console.error(
+          `❌ Failed to refresh token for user ${userId}:`,
+          error
+        )
         throw new Error("Failed to refresh access token")
       }
     }
 
+    console.log(`✅ Returning valid access token for user ${userId}`)
     return user.accessToken
   }
 
