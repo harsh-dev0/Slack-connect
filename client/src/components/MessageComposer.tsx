@@ -204,7 +204,7 @@ const MessageComposer: React.FC = () => {
                   min={format(new Date(), "yyyy-MM-dd")}
                   className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-zinc-500 transition-all duration-200 hover:border-gray-500"
                   style={{
-                    colorScheme: 'dark'
+                    colorScheme: "dark",
                   }}
                 />
               </div>
@@ -222,7 +222,7 @@ const MessageComposer: React.FC = () => {
                   onChange={(e) => setScheduleTime(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-zinc-500 transition-all duration-200 hover:border-gray-500"
                   style={{
-                    colorScheme: 'dark'
+                    colorScheme: "dark",
                   }}
                 />
               </div>
