@@ -4,6 +4,8 @@ export interface IUser extends Document {
   slackUserId: string
   slackTeamId: string
   accessToken: string
+  botUserId?: string
+  userToken?: string
   refreshToken?: string
   tokenExpiresAt?: Date
   createdAt: Date
@@ -14,6 +16,8 @@ const UserSchema = new Schema<IUser>({
   slackUserId: { type: String, required: true, unique: true },
   slackTeamId: { type: String, required: true },
   accessToken: { type: String, required: true },
+  botUserId: { type: String },
+  userToken: { type: String },
   refreshToken: { type: String },
   tokenExpiresAt: { type: Date },
   createdAt: { type: Date, default: Date.now },

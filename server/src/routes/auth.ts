@@ -7,7 +7,8 @@ const router = express.Router()
 router.get("/slack", (req, res) => {
   const clientId = process.env.SLACK_CLIENT_ID
   const redirectUri = process.env.SLACK_REDIRECT_URI
-  const scopes = "channels:read,chat:write,users:read"
+  const userScopes = "channels:read,users:read"
+  const botScopes = "channels:read,chat:write,users:read"
 
   if (!clientId || !redirectUri) {
     return res
@@ -15,7 +16,7 @@ router.get("/slack", (req, res) => {
       .json({ error: "Missing Slack OAuth configuration" })
   }
 
-  const authUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(
+  const authUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${botScopes}&user_scope=${userScopes}&redirect_uri=${encodeURIComponent(
     redirectUri
   )}`
 
@@ -35,9 +36,10 @@ router.get("/slack/callback", async (req, res) => {
     const tokenData = await SlackService.exchangeCodeForToken(code)
 
     if (
-      !tokenData.authed_user?.access_token ||
-      !tokenData.authed_user?.id ||
-      !tokenData.team?.id
+      !tokenData.access_token ||
+      !tokenData.bot_user_id ||
+      !tokenData.team?.id ||
+      !tokenData.authed_user?.id
     ) {
       console.error("Invalid token data:", tokenData)
       return res
@@ -50,14 +52,18 @@ router.get("/slack/callback", async (req, res) => {
     })
 
     if (existingUser) {
-      existingUser.accessToken = tokenData.authed_user.access_token
+      existingUser.accessToken = tokenData.access_token
+      existingUser.botUserId = tokenData.bot_user_id
       existingUser.slackTeamId = tokenData.team.id
-      if (tokenData.authed_user.refresh_token) {
-        existingUser.refreshToken = tokenData.authed_user.refresh_token
+      if (tokenData.authed_user.access_token) {
+        existingUser.userToken = tokenData.authed_user.access_token
       }
-      if (tokenData.authed_user.expires_in) {
+      if (tokenData.refresh_token) {
+        existingUser.refreshToken = tokenData.refresh_token
+      }
+      if (tokenData.expires_in) {
         existingUser.tokenExpiresAt = new Date(
-          Date.now() + tokenData.authed_user.expires_in * 1000
+          Date.now() + tokenData.expires_in * 1000
         )
       }
       await existingUser.save()
@@ -65,10 +71,12 @@ router.get("/slack/callback", async (req, res) => {
       const newUser = new User({
         slackUserId: tokenData.authed_user.id,
         slackTeamId: tokenData.team.id,
-        accessToken: tokenData.authed_user.access_token,
-        refreshToken: tokenData.authed_user.refresh_token || null,
-        tokenExpiresAt: tokenData.authed_user.expires_in
-          ? new Date(Date.now() + tokenData.authed_user.expires_in * 1000)
+        accessToken: tokenData.access_token,
+        botUserId: tokenData.bot_user_id,
+        userToken: tokenData.authed_user.access_token || null,
+        refreshToken: tokenData.refresh_token || null,
+        tokenExpiresAt: tokenData.expires_in
+          ? new Date(Date.now() + tokenData.expires_in * 1000)
           : undefined,
       })
       await newUser.save()
@@ -78,6 +86,7 @@ router.get("/slack/callback", async (req, res) => {
       success: true,
       userId: tokenData.authed_user.id,
       teamId: tokenData.team.id,
+      botUserId: tokenData.bot_user_id,
     })
   } catch (error: any) {
     console.error("OAuth callback error:", error)

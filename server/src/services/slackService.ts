@@ -12,6 +12,10 @@ export interface SlackChannel {
 export interface SlackOAuthResponse {
   ok: boolean
   access_token: string
+  token_type: string
+  scope: string
+  bot_user_id?: string
+  app_id: string
   refresh_token?: string
   expires_in?: number
   team: {
@@ -20,10 +24,14 @@ export interface SlackOAuthResponse {
   }
   authed_user: {
     id: string
-    access_token: string
+    scope?: string
+    access_token?: string
+    token_type?: string
     refresh_token?: string
     expires_in?: number
   }
+  enterprise?: any
+  is_enterprise_install: boolean
 }
 
 export class SlackService {
@@ -175,20 +183,36 @@ export class SlackService {
       try {
         const tokenData = await this.refreshAccessToken(user.refreshToken)
 
-        user.accessToken = tokenData.authed_user.access_token
-        if (tokenData.authed_user.refresh_token) {
-          user.refreshToken = tokenData.authed_user.refresh_token
+        user.accessToken = tokenData.access_token
+        if (tokenData.refresh_token) {
+          user.refreshToken = tokenData.refresh_token
         }
-        if (tokenData.authed_user.expires_in) {
+        if (tokenData.expires_in) {
           user.tokenExpiresAt = new Date(
-            Date.now() + tokenData.authed_user.expires_in * 1000
+            Date.now() + tokenData.expires_in * 1000
           )
+        }
+        if (tokenData.authed_user?.access_token) {
+          user.userToken = tokenData.authed_user.access_token
         }
 
         await user.save()
       } catch (error) {
         throw new Error("Failed to refresh access token")
       }
+    }
+
+    return user.accessToken
+  }
+
+  static async getUserToken(userId: string): Promise<string> {
+    const user = await User.findOne({ slackUserId: userId })
+    if (!user) {
+      throw new Error("User not found")
+    }
+
+    if (user.userToken) {
+      return user.userToken
     }
 
     return user.accessToken
