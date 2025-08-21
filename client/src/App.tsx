@@ -1,23 +1,37 @@
-import React from "react"
+import { AppProvider } from "./context/AppProvider"
+import AuthConnect from "./components/AuthConnect"
+import MessageComposer from "./components/MessageComposer"
+import ScheduledMessages from "./components/ScheduledMessages"
+import CallbackHandler from "./components/CallbackHandler"
+import HealthCheck from "./components/HealthCheck"
 
 function App() {
-  const [count, setCount] = React.useState(0)
-
   return (
-    <div className="flex flex-col bg-blue-700 min-h-screen">
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <p className="mb-4 text-4xl font-bold text-blue-500">
-          Example Counter
-        </p>
-        <p className="mb-4 text-4xl font-bold text-blue-500">{count}</p>
-        <button
-          onClick={() => setCount(count + 1)}
-          className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-        >
-          Click me!
-        </button>
+    <AppProvider>
+      <div className="min-h-screen bg-gray-50">
+        <CallbackHandler />
+
+        <div className="max-w-4xl mx-auto py-8 px-4">
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <h1 className="text-3xl font-bold text-gray-900 mr-4">
+                Slack Connect
+              </h1>
+              <HealthCheck />
+            </div>
+            <p className="text-gray-600">
+              Send messages immediately or schedule them for later
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <AuthConnect />
+            <MessageComposer />
+            <ScheduledMessages />
+          </div>
+        </div>
       </div>
-    </div>
+    </AppProvider>
   )
 }
 
