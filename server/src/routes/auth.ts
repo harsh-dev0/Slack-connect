@@ -24,13 +24,14 @@ router.get("/slack", (req, res) => {
 })
 
 router.get("/slack/callback", async (req, res) => {
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
+
   try {
     const { code } = req.query
 
     if (!code || typeof code !== "string") {
-      return res
-        .status(400)
-        .json({ error: "Authorization code is required" })
+      console.error("No authorization code provided")
+      return res.redirect(`${frontendUrl}?error=no_code`)
     }
 
     const tokenData = await SlackService.exchangeCodeForToken(code)
@@ -42,9 +43,7 @@ router.get("/slack/callback", async (req, res) => {
       !tokenData.authed_user?.id
     ) {
       console.error("Invalid token data:", tokenData)
-      return res
-        .status(400)
-        .json({ error: "Invalid OAuth response from Slack" })
+      return res.redirect(`${frontendUrl}?error=invalid_token`)
     }
 
     const existingUser = await User.findOne({
@@ -82,15 +81,18 @@ router.get("/slack/callback", async (req, res) => {
       await newUser.save()
     }
 
-    res.json({
-      success: true,
-      userId: tokenData.authed_user.id,
-      teamId: tokenData.team.id,
-      botUserId: tokenData.bot_user_id,
-    })
+    console.log(`✅ OAuth success for user ${tokenData.authed_user.id}`)
+
+    res.redirect(
+      `${frontendUrl}?success=true&userId=${tokenData.authed_user.id}&teamId=${tokenData.team.id}`
+    )
   } catch (error: any) {
     console.error("OAuth callback error:", error)
-    res.status(500).json({ error: error.message })
+    res.redirect(
+      `${frontendUrl}?error=oauth_failed&message=${encodeURIComponent(
+        error.message
+      )}`
+    )
   }
 })
 
@@ -106,6 +108,7 @@ router.get("/status/:userId", async (req, res) => {
     res.json({
       connected: true,
       teamId: user.slackTeamId,
+      botUserId: user.botUserId,
       tokenExpires: user.tokenExpiresAt,
     })
   } catch (error: any) {
