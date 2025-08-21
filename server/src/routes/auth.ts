@@ -22,11 +22,11 @@ router.get("/slack", (req, res) => {
   res.json({ authUrl })
 })
 
-router.post("/slack/callback", async (req, res) => {
+router.get("/slack/callback", async (req, res) => {
   try {
-    const { code } = req.body
+    const { code } = req.query
 
-    if (!code) {
+    if (!code || typeof code !== "string") {
       return res
         .status(400)
         .json({ error: "Authorization code is required" })
