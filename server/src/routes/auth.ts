@@ -34,6 +34,17 @@ router.get("/slack/callback", async (req, res) => {
 
     const tokenData = await SlackService.exchangeCodeForToken(code)
 
+    if (
+      !tokenData.authed_user?.access_token ||
+      !tokenData.authed_user?.id ||
+      !tokenData.team?.id
+    ) {
+      console.error("Invalid token data:", tokenData)
+      return res
+        .status(400)
+        .json({ error: "Invalid OAuth response from Slack" })
+    }
+
     const existingUser = await User.findOne({
       slackUserId: tokenData.authed_user.id,
     })
@@ -55,7 +66,7 @@ router.get("/slack/callback", async (req, res) => {
         slackUserId: tokenData.authed_user.id,
         slackTeamId: tokenData.team.id,
         accessToken: tokenData.authed_user.access_token,
-        refreshToken: tokenData.authed_user.refresh_token,
+        refreshToken: tokenData.authed_user.refresh_token || null,
         tokenExpiresAt: tokenData.authed_user.expires_in
           ? new Date(Date.now() + tokenData.authed_user.expires_in * 1000)
           : undefined,
